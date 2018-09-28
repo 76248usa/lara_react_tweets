@@ -15,16 +15,29 @@ class App extends Component {
   }
 
   getPosts() {
-    this.setState({ loading: true });
+    //this.setState({ loading: true });
     axios.get("/posts").then(response =>
       this.setState({
-        posts: [...response.data.posts],
-        loading: false
+        posts: [...response.data.posts]
+        //loading: false
       })
     );
   }
   componentWillMount() {
     this.getPosts();
+  }
+  componentDidMount() {
+    Echo.private("new-post").listen("PostCreated", e => {
+      //this.setState({ posts: [e.post, ...this.state.posts] });
+      if (window.Laravel.user.following.includes(e.post.user_id)) {
+        this.setState({ posts: [e.post, ...this.state.posts] });
+      }
+    });
+    //this.interval = setInterval(() => this.getPosts(), 30000);
+  }
+
+  componentWillUnmount() {
+    //clearInterval(this.interval);
   }
 
   handleSubmit(e) {
